@@ -4,6 +4,7 @@
 #include "raylib.h"
 #include "Player.h"
 #include "PlatformManager.h"
+#include <string>
 
 // Main Game class: manages game loop, state, and objects
 class Game {
@@ -25,6 +26,10 @@ private:
     float elapsedTime{0.0f};      // Elapsed game time
     int lastBonusDistance{0};      // Last distance bonus applied
 
+    // High score tracking
+    int highScore{0};  
+    std::string highScoreFile{"highscore.txt"};
+
     // Background texture
     Texture2D background;
     float parallaxFactor{0.5f}; // Adjust for depth effect (1.0 = fixed to camera, <1 = slower)
@@ -34,6 +39,10 @@ private:
     void Respawn(bool loseLife);      // Respawns player, optionally loses a life
     void Reset();                     // Resets game state
     void Draw();                      // Draws game scene and UI
+
+    // High score helpers
+    void LoadHighScore();
+    void SaveHighScore();
 };
 
 #endif

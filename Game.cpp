@@ -3,6 +3,7 @@
 #include <ctime>
 #include "raylib.h"
 #include <cmath>
+#include <fstream>
 
 // Game class constructor: initializes window, camera, and player/platforms
 Game::Game() : platformManager(screenH * 0.7f) {
@@ -24,10 +25,14 @@ Game::Game() : platformManager(screenH * 0.7f) {
     }
 
     lastBonusDistance = 0; // Track last distance bonus applied
+
+    // Load high score from file
+    LoadHighScore();
 }
 
 // Destructor
 Game::~Game() {
+    SaveHighScore();   // Save before exit
     UnloadTexture(background);
     CloseWindow();
 }
@@ -104,7 +109,16 @@ void Game::HandleCollisions(float dt) {
 void Game::Respawn(bool loseLife) {
     if (loseLife) {
         lives--;
-        if (lives <= 0) { gameOver = true; return; }
+        if (lives <= 0) { 
+            // Update high score if beaten
+            int finalDistance = (int)(distanceTraveled / 10.0f);
+            if (finalDistance > highScore) {
+                highScore = finalDistance;
+                SaveHighScore();
+            }
+            gameOver = true; 
+            return; 
+        }
     }
 
     float camLeft = camera.target.x - camera.offset.x;
@@ -165,13 +179,34 @@ void Game::Draw() {
 
     EndMode2D();
 
-    DrawRectangle(8, 8, 220, 76, Fade(BLACK, 0.35f));
-    DrawRectangleLines(8, 8, 220, 76, BLUE);
+    DrawRectangle(8, 8, 260, 96, Fade(BLACK, 0.35f));
+    DrawRectangleLines(8, 8, 260, 96, BLUE);
 
     DrawText(TextFormat("FP: %d", lives), 16, 16, 20, RED);
     DrawText(TextFormat("Distance: %d m", (int)(distanceTraveled / 10.0f)), 16, 40, 16, RED);
+    DrawText(TextFormat("High Score: %d m", highScore), 16, 64, 16, GOLD);
 
     if (gameOver) DrawText("GAME OVER - Press R to Restart", screenW / 2 - 180, screenH / 2 - 10, 20, RED);
 
     EndDrawing();
+}
+
+// Load high score
+void Game::LoadHighScore() {
+    std::ifstream file(highScoreFile);
+    if (file.is_open()) {
+        file >> highScore;
+        file.close();
+    } else {
+        highScore = 0; // default if no file
+    }
+}
+
+// Save high score
+void Game::SaveHighScore() {
+    std::ofstream file(highScoreFile);
+    if (file.is_open()) {
+        file << highScore;
+        file.close();
+    }
 }
