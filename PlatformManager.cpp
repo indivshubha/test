@@ -1,17 +1,17 @@
 #include "PlatformManager.h"
 #include <cstdlib>
 
-// Constructor
+// Constructor: sets the base Y position for platforms
 PlatformManager::PlatformManager(float baseY) : basePlatformY(baseY) {}
 
-// Random multiple of 16
+// Returns a random multiple of 16 between minVal and maxVal
 int PlatformManager::RandRange16(int minVal, int maxVal) {
     int range = (maxVal - minVal) / 16 + 1;
     int r = std::rand() % range;
     return minVal + r * 16;
 }
 
-// Seed starting platforms
+// Seeds the initial set of platforms at game start
 void PlatformManager::SeedInitial(float startX, int count) {
     float x = startX;
     int widths[4] = {64, 80, 96, 112};
@@ -31,7 +31,7 @@ void PlatformManager::SeedInitial(float startX, int count) {
     }
 }
 
-// Cleanup old platforms
+// Removes platforms that have moved out of view (to the left)
 void PlatformManager::Cleanup(float cleanupX) {
     while (!platforms.empty() &&
            platforms.front().rect.x + platforms.front().rect.width < cleanupX) {
@@ -39,7 +39,7 @@ void PlatformManager::Cleanup(float cleanupX) {
     }
 }
 
-// Generate new platforms dynamically
+// Dynamically generates new platforms as the player progresses
 void PlatformManager::Generate(float untilX, float dt) {
     elapsedTime += dt;
 
@@ -81,12 +81,12 @@ void PlatformManager::Generate(float untilX, float dt) {
     }
 }
 
-// Draw platforms as solid dark 
+// Draws all platforms to the screen
 void PlatformManager::Draw() const {
     for (const auto &p : platforms) {
         DrawRectangleRec(p.rect, {0,0,0,125});
     }
 }
 
-// Destructor
+// Destructor: currently does nothing, but defined for completeness
 PlatformManager::~PlatformManager() {}
